@@ -6,13 +6,13 @@
 /*   By: htavares <htavares@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/25 12:02:47 by htavares          #+#    #+#             */
-/*   Updated: 2025/11/26 12:52:16 by htavares         ###   ########.fr       */
+/*   Updated: 2025/11/27 18:00:07 by htavares         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "philosophers.h"
 
-void	print_encountered_error(int erroridx)
+void	print_error(int erroridx)
 {
 	if (erroridx == 1)
 		write(1, "invalid number of philosophers", 30);
@@ -36,4 +36,54 @@ void	print_error_args()
 	write (1, "Args to pass: ", 14);
 	write (1, "<phil.num> <time2die> <time2eat> ", 33);
 	write (1, "<time2sleep> <num.times.eat>\n", 29);
+}
+
+int	ft_atoi(const char *nptr)
+{
+	int	sign;
+	int	result;
+
+	sign = 1;
+	result = 0;
+	while ((*nptr >= 9 && *nptr <= 13) || *nptr == 32)
+		nptr++;
+	if (*nptr == 45)
+	{
+		sign *= -1;
+		nptr++;
+	}
+	if (*nptr == 43 && sign > 0)
+		nptr++;
+	while (*nptr > 47 && *nptr < 58)
+	{
+		result *= 10;
+		result += *nptr - 48;
+		nptr++;
+	}
+	return (result * sign);
+}
+
+long	ft_atol(const char *nptr)
+{
+	int		sign;
+	long	result;
+
+	sign = 1;
+	result = 0;
+	while ((*nptr >= 9 && *nptr <= 13) || *nptr == 32)
+		nptr++;
+	if (*nptr == 45)
+	{
+		sign *= -1;
+		nptr++;
+	}
+	if (*nptr == 43 && sign > 0)
+		nptr++;
+	while (*nptr > 47 && *nptr < 58)
+	{
+		result *= 10;
+		result += *nptr - 48;
+		nptr++;
+	}
+	return (result * sign);
 }

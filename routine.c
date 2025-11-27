@@ -1,24 +1,37 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   ft_putchar_fd.c                                    :+:      :+:    :+:   */
+/*   routine.c                                          :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: htavares <htavares@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2025/04/23 11:39:36 by htavares          #+#    #+#             */
-/*   Updated: 2025/05/01 12:13:25 by htavares         ###   ########.fr       */
+/*   Created: 2025/11/27 13:33:18 by htavares          #+#    #+#             */
+/*   Updated: 2025/11/27 18:59:44 by htavares         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "libft.h"
+#include "philosophers.h"
 
-void	ft_putchar_fd(char c, int fd)
+void	sleeping()
 {
-	write(fd, &c, 1);
+	
 }
-/*
-int	main(void)
+
+void	eating()
 {
-	ft_putchar_fd('a', 1);
+	
 }
-*/
+
+void	thinking()
+{
+	
+}
+
+void	*routine(void *philosopher)
+{
+	t_philosopher *phil;
+
+	phil = (t_philosopher *)philosopher;
+	//make the moafuckas routine
+	return (NULL);
+}
