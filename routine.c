@@ -32,6 +32,8 @@ void	*routine(void *philosopher)
 	t_philosopher *phil;
 
 	phil = (t_philosopher *)philosopher;
+	if (!phil)
+		return (NULL);
 	//make the moafuckas routine
 	return (NULL);
 }

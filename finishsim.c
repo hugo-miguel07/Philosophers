@@ -12,22 +12,35 @@
 
 #include "philosophers.h"
 
-void	freeall(t_philovars **pv, t_philosopher **p)
+void	freeall(t_philovars **pv, t_philosopher **p, t_fork **f)
 {
-	if (*pv)
+	if (pv && *pv)
+	{
 		free(*pv);
-	if (*p)
-		free(*p);;
+		*pv = NULL;
+	}
+	if (p && *p)
+	{
+		free(*p);
+		*p = NULL;
+	}
+	if (f && *f)
+	{
+		free(*f);
+		*f = NULL;
+	}
 }
 
 void	destroymutex(int mutex_num, t_fork *f)
 {
 	int	i;
 	
+	if (!f)
+		return ;
 	i = 0;
 	while (i < mutex_num)
 	{
-		pthread_mutex_destroy(&f[i].using);
+		pthread_mutex_destroy(&(f[i]).using);
 		i++;
 	}
 }
@@ -36,6 +49,8 @@ void	jointhreads(int thread_num, t_philosopher **p)
 {
 	int	i;
 	
+	if (!p || !*p)
+		return ;
 	i = 0;
 	while (i < thread_num)
 	{
@@ -48,8 +63,11 @@ void	finish_routine(t_philovars **pv, t_philosopher **p, t_fork **f)
 {
 	int	philo_num;
 
+	if (!pv || !*pv)
+		return ;
 	philo_num = (*pv)->philo_num;
 	jointhreads(philo_num, p);
-	destroymutex(philo_num, *f);
-	freeall(pv, p);
+	if (f && *f)
+		destroymutex(philo_num, *f);
+	freeall(pv, p, f);
 }
