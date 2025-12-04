@@ -16,6 +16,8 @@
 # define SLEEPING 1
 # define EATING 2
 # define THINKING 3
+# define FORKING 4
+# define DEAD 5
 
 # include <unistd.h>
 # include <stdio.h>
@@ -47,17 +49,19 @@ typedef struct s_philosopher
 	long		time_to_sleep;
 	int			eat_max_num;
 	int			state;
+	long long	time_now;
 	t_fork		*fork;
 	pthread_t	thread;
 	
 }	t_philosopher;
 
-void	print_error_args();
-void	print_error(int erroridx);
-long	ft_atol(const char *nptr);
-int		ft_atoi(const char *nptr);
-void	*routine(void *philosopher);
-void	finish_routine(t_philovars **pv, t_philosopher **p, t_fork **f);
-void	destroymutex(int mutex_num, t_fork *f);
+void		print_error_args();
+void		print_error(int erroridx);
+long		ft_atol(const char *nptr);
+int			ft_atoi(const char *nptr);
+void		*routine(void *philosopher);
+void		finish_routine(t_philovars **pv, t_philosopher **p, t_fork **f);
+void		destroymutex(int mutex_num, t_fork *f);
+long long	get_the_time(void);
 
 #endif

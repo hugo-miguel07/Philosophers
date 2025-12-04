@@ -21,6 +21,10 @@ void	printstate(t_philosopher **philosopher)
 	{
 		printf("%d philosopher%d is thinking");
 	}
+	if (phil->state == FORKING)
+	{
+		printf("%d philosopher%d has taken a fork");
+	}
 	else if (phil->state == EATING)
 	{
 		printf("%d philosopher%d is eating");
@@ -31,7 +35,7 @@ void	printstate(t_philosopher **philosopher)
 	}
 }
 
-void	sleeping(t_philosopher **philosopher, struct timeval *now)
+void	sleeping(t_philosopher **philosopher)
 {
 	t_philosopher *phil;
 	
@@ -42,19 +46,21 @@ void	sleeping(t_philosopher **philosopher, struct timeval *now)
 	//enviar sinal que está a dormir	
 }
 
-void	eating(t_philosopher **philosopher, struct timeval *now)
+void	eating(t_philosopher **philosopher)
 {
 	t_philosopher *phil;
 	
 	phil = *philosopher;
+	pthread_mutex_lock(phil->fork);
+	phil->state = FORKING;
+	printstate(philosopher);
 	phil->state = EATING;
-	//aceder aos forks
-	//printar que pegou nos garfos
-	//usleep do tempo de comer
-	//enviar sinal que está a comer
+	printstate(philosopher);
+	usleep(phil->time_to_eat);
+	pthread_mutex_unlock(phil->fork);
 }
 
-void	thinking(t_philosopher **philosopher, struct timeval *now)
+void	thinking(t_philosopher **philosopher)
 {
 	t_philosopher *phil;
 	
@@ -72,22 +78,16 @@ void	*routine(void *philosopher)
 	phil = (t_philosopher *)philosopher;
 	if (!phil)
 		return (NULL);
-	//ideia depois para os prints:
-	//	a struct phil pode ter mais 1 variavel
-	//	que representa o estado em que se encontram.
-	//	esse estado vai ser atualizado e printado quando
-	//	entrarem noutra função de execução
-	//	(thinking, eating, sleeping)
 	times_to_eat = phil->eat_max_num;
 	while (times_to_eat)
 	{
-		thinking(&phil, now);
-		eating(&phil, now);
+		thinking(&phil);
+		eating(&phil);
 		if (times_to_eat > 0)
 			times_to_eat--;
 		if (times_to_eat == 0)
 			break ;
-		sleeping(&phil, now);
+		sleeping(&phil);
 	}
 	//flag para acabar todas as outras threads
 	return (NULL);
