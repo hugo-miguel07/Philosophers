@@ -12,23 +12,54 @@
 
 #include "philosophers.h"
 
-void	sleeping()
+void	printstate(t_philosopher **philosopher)
 {
+	t_philosopher *phil;
+	
+	phil = *philosopher;
+	if (phil->state == THINKING)
+	{
+		printf("%d philosopher%d is thinking");
+	}
+	else if (phil->state == EATING)
+	{
+		printf("%d philosopher%d is eating");
+	}
+	else if (phil->state == SLEEPING)
+	{
+		printf("%d philosopher%d is sleeping");
+	}
+}
+
+void	sleeping(t_philosopher **philosopher, struct timeval *now)
+{
+	t_philosopher *phil;
+	
+	phil = *philosopher;
+	phil->state = SLEEPING;
 	//libertas os forks
 	//usleep do tempo de dormir
 	//enviar sinal que está a dormir	
 }
 
-void	eating()
+void	eating(t_philosopher **philosopher, struct timeval *now)
 {
+	t_philosopher *phil;
+	
+	phil = *philosopher;
+	phil->state = EATING;
 	//aceder aos forks
+	//printar que pegou nos garfos
 	//usleep do tempo de comer
 	//enviar sinal que está a comer
 }
 
-void	thinking()
+void	thinking(t_philosopher **philosopher, struct timeval *now)
 {
-	//enviar sinal que está a pensar
+	t_philosopher *phil;
+	
+	phil = *philosopher;
+	phil->state = THINKING;
 	usleep(100);
 }
 
@@ -36,6 +67,7 @@ void	*routine(void *philosopher)
 {
 	t_philosopher	*phil;
 	int				times_to_eat;
+	struct timeval	*now;
 
 	phil = (t_philosopher *)philosopher;
 	if (!phil)
@@ -49,13 +81,13 @@ void	*routine(void *philosopher)
 	times_to_eat = phil->eat_max_num;
 	while (times_to_eat)
 	{
-		thinking();
-		eating();
+		thinking(&phil, now);
+		eating(&phil, now);
 		if (times_to_eat > 0)
 			times_to_eat--;
 		if (times_to_eat == 0)
 			break ;
-		sleeping();
+		sleeping(&phil, now);
 	}
 	//flag para acabar todas as outras threads
 	return (NULL);

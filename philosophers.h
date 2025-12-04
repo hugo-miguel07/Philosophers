@@ -13,6 +13,10 @@
 #ifndef PHILOSOPHERS_H
 # define PHILOSOPHERS_H
 
+# define SLEEPING 1
+# define EATING 2
+# define THINKING 3
+
 # include <unistd.h>
 # include <stdio.h>
 # include <string.h>
@@ -42,6 +46,7 @@ typedef struct s_philosopher
 	long		time_to_eat;
 	long		time_to_sleep;
 	int			eat_max_num;
+	int			state;
 	t_fork		*fork;
 	pthread_t	thread;
 	
