@@ -98,7 +98,7 @@ int	main(int ac, char **av)
 	t_philosopher	*philosophers;
 	t_fork			*forks;
 	
-	if (ac != 6)
+	if (ac != 6 && ac != 5)
 		return (print_error_args(), 1);
 	philovars = NULL;
 	parse_arguments(&philovars, av);

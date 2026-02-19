@@ -49,11 +49,20 @@ typedef struct s_philosopher
 	long		time_to_sleep;
 	int			eat_max_num;
 	int			state;
-	long long	time_now;
+	t_table 	*time_table;
 	t_fork		*fork;
 	pthread_t	thread;
 	
 }	t_philosopher;
+
+typedef struct s_table
+{
+	long long		*start_time;
+	int				*philo_num;
+	t_fork			*forks;
+	pthread_mutex_t	*write_lock;
+	int				simulation_end;
+}	t_table;
 
 void		print_error_args();
 void		print_error(int erroridx);

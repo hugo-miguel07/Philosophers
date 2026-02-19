@@ -19,19 +19,19 @@ void	printstate(t_philosopher **philosopher)
 	phil = *philosopher;
 	if (phil->state == THINKING)
 	{
-		printf("%d philosopher%d is thinking");
+		printf("%lld philosopher%d is thinking\n", phil->time_now, phil->idx);
 	}
 	if (phil->state == FORKING)
 	{
-		printf("%d philosopher%d has taken a fork");
+		printf("%lld philosopher%d has taken a fork\n", phil->time_now, phil->idx);
 	}
 	else if (phil->state == EATING)
 	{
-		printf("%d philosopher%d is eating");
+		printf("%lld philosopher%d is eating\n", phil->time_now, phil->idx);
 	}
 	else if (phil->state == SLEEPING)
 	{
-		printf("%d philosopher%d is sleeping");
+		printf("%lld philosopher%d is sleeping\n", phil->time_now, phil->idx);
 	}
 }
 
@@ -51,13 +51,13 @@ void	eating(t_philosopher **philosopher)
 	t_philosopher *phil;
 	
 	phil = *philosopher;
-	pthread_mutex_lock(phil->fork);
+	pthread_mutex_lock(&phil->fork->using);
 	phil->state = FORKING;
 	printstate(philosopher);
 	phil->state = EATING;
 	printstate(philosopher);
 	usleep(phil->time_to_eat);
-	pthread_mutex_unlock(phil->fork);
+	pthread_mutex_unlock(&phil->fork->using);
 }
 
 void	thinking(t_philosopher **philosopher)
@@ -73,7 +73,6 @@ void	*routine(void *philosopher)
 {
 	t_philosopher	*phil;
 	int				times_to_eat;
-	struct timeval	*now;
 
 	phil = (t_philosopher *)philosopher;
 	if (!phil)

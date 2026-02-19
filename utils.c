@@ -26,7 +26,7 @@ void	print_error(int erroridx)
 		write(1, "invalid number of eat times", 27);
 	if (erroridx == 6)
 		write(1, "program failed to initialize phils", 34);
-	if (erroridx == 6)
+	if (erroridx == 7)
 		write(1, "program failed to initialize philvars", 37);
 }
 
