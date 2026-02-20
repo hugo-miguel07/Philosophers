@@ -1,6 +1,6 @@
 NAME = philo
 SRCS = philosophers.c utils.c routine.c \
-		finishsim.c time.c
+		finishsim.c time.c innits.c
 
 OBJS = $(SRCS:.c=.o)
 

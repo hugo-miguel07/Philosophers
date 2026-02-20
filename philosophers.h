@@ -41,6 +41,15 @@ typedef struct s_fork
 	pthread_mutex_t	using;
 }	t_fork;
 
+typedef struct s_table
+{
+	long long		start_time;
+	int				philo_num;
+	t_fork			*forks;
+	pthread_mutex_t	write_lock;
+	int				simulation_end;
+}	t_table;
+
 typedef struct s_philosopher
 {
 	int			idx;		
@@ -49,28 +58,23 @@ typedef struct s_philosopher
 	long		time_to_sleep;
 	int			eat_max_num;
 	int			state;
+	long long	time_now;
 	t_table 	*time_table;
 	t_fork		*fork;
 	pthread_t	thread;
 	
 }	t_philosopher;
 
-typedef struct s_table
-{
-	long long		*start_time;
-	int				*philo_num;
-	t_fork			*forks;
-	pthread_mutex_t	*write_lock;
-	int				simulation_end;
-}	t_table;
-
-void		print_error_args();
-void		print_error(int erroridx);
-long		ft_atol(const char *nptr);
-int			ft_atoi(const char *nptr);
-void		*routine(void *philosopher);
-void		finish_routine(t_philovars **pv, t_philosopher **p, t_fork **f);
-void		destroymutex(int mutex_num, t_fork *f);
-long long	get_the_time(void);
+t_table			*innit_table(t_fork *forks, int philnum);
+t_fork			*innit_forks(int forknum);
+t_philosopher	*innit_phils(t_philovars *philovars, t_fork *forks, t_table *table);
+void			print_error_args();
+void			print_error(int erroridx);
+long			ft_atol(const char *nptr);
+int				ft_atoi(const char *nptr);
+void			*routine(void *philosopher);
+void			finish_routine(t_philovars **pv, t_philosopher **p, t_fork **f);
+void			destroymutex(int mutex_num, t_fork *f);
+long long		get_the_time(void);
 
 #endif
