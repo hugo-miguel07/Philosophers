@@ -87,3 +87,20 @@ long	ft_atol(const char *nptr)
 	}
 	return (result * sign);
 }
+
+int	is_number(const char *nptr)
+{
+	if (!nptr || *nptr == '\0')
+		return (0);
+	if (*nptr == '+')
+		nptr++;
+	if (*nptr == '\0')
+		return (0);
+	while (*nptr)
+	{
+		if (*nptr < '0' || *nptr > '9')
+			return (0);
+		nptr++;
+	}
+	return (1);
+}

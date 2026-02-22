@@ -60,7 +60,8 @@ typedef struct s_philosopher
 	int			state;
 	long long	time_now;
 	t_table 	*time_table;
-	t_fork		*fork;
+	t_fork		*left_fork;
+	t_fork		*right_fork;
 	pthread_t	thread;
 	
 }	t_philosopher;
@@ -68,10 +69,12 @@ typedef struct s_philosopher
 t_table			*innit_table(t_fork *forks, int philnum);
 t_fork			*innit_forks(int forknum);
 t_philosopher	*innit_phils(t_philovars *philovars, t_fork *forks, t_table *table);
+int				start_threads(t_philosopher *philosophers, int count);
 void			print_error_args();
 void			print_error(int erroridx);
 long			ft_atol(const char *nptr);
 int				ft_atoi(const char *nptr);
+int				is_number(const char *nptr);
 void			*routine(void *philosopher);
 void			finish_routine(t_philovars **pv, t_philosopher **p, t_fork **f);
 void			destroymutex(int mutex_num, t_fork *f);

@@ -51,13 +51,17 @@ void	eating(t_philosopher **philosopher)
 	t_philosopher *phil;
 	
 	phil = *philosopher;
-	pthread_mutex_lock(&phil->fork->using);
+	pthread_mutex_lock(&phil->left_fork->using);
+	phil->state = FORKING;
+	printstate(philosopher);
+	pthread_mutex_lock(&phil->right_fork->using);
 	phil->state = FORKING;
 	printstate(philosopher);
 	phil->state = EATING;
 	printstate(philosopher);
 	usleep(phil->time_to_eat);
-	pthread_mutex_unlock(&phil->fork->using);
+	pthread_mutex_unlock(&phil->right_fork->using);
+	pthread_mutex_unlock(&phil->left_fork->using);
 }
 
 void	thinking(t_philosopher **philosopher)

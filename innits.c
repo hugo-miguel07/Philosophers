@@ -6,7 +6,7 @@
 /*   By: htavares <htavares@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/02/20 14:15:31 by htavares          #+#    #+#             */
-/*   Updated: 2026/02/20 14:49:44 by htavares         ###   ########.fr       */
+/*   Updated: 2026/02/21 23:49:08 by htavares         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -61,8 +61,8 @@ t_philosopher	*innit_phils(t_philovars *philovars, t_fork *forks, t_table *table
 	philosophers = malloc(phil_num * sizeof(t_philosopher));
 	if (!philosophers)
 		return (NULL);
-	i = 0;
-	while (i < phil_num)
+	i = -1;
+	while (++i < phil_num)
 	{
 		philosophers[i].idx = i;
 		philosophers[i].time_to_die = philovars->time_to_die;
@@ -71,10 +71,31 @@ t_philosopher	*innit_phils(t_philovars *philovars, t_fork *forks, t_table *table
 		philosophers[i].eat_max_num = philovars->eat_max_num;
 		philosophers[i].time_now = 0;
 		philosophers[i].time_table = table;
-		philosophers[i].fork = &forks[i];
-		if (pthread_create(&philosophers[i].thread, NULL, routine, (void *)&philosophers[i]) != 0)
-			return (free(philosophers), NULL);
-		i++;
+		philosophers[i].left_fork = &forks[i];
+		philosophers[i].right_fork = &forks[(i + 1) % phil_num];
 	}
 	return (philosophers);
+}
+
+int	start_threads(t_philosopher *philosophers, int count)
+{
+	int	i;
+
+	if (!philosophers || count <= 0)
+		return (0);
+	i = 0;
+	while (i < count)
+	{
+		if (pthread_create(&philosophers[i].thread, NULL, routine, (void *)&philosophers[i]) != 0)
+		{
+			while (i > 0)
+			{
+				i--;
+				pthread_join(philosophers[i].thread, NULL);
+			}
+			return (0);
+		}
+		i++;
+	}
+	return (1);
 }
