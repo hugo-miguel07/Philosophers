@@ -6,7 +6,7 @@
 /*   By: htavares <htavares@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/02/20 14:15:31 by htavares          #+#    #+#             */
-/*   Updated: 2026/02/21 23:49:08 by htavares         ###   ########.fr       */
+/*   Updated: 2026/02/24 13:37:30 by htavares         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -25,6 +25,11 @@ t_table	*innit_table(t_fork *forks, int philnum)
 	table->start_time = 0;
 	if (pthread_mutex_init(&table->write_lock, NULL) != 0)
 		return (free(table), NULL);
+	if (pthread_mutex_init(&table->simulation_lock, NULL) != 0)
+	{
+		pthread_mutex_destroy(&table->write_lock);
+		return (free(table), NULL);
+	}
 	return (table);
 }
 
@@ -51,51 +56,56 @@ t_fork	*innit_forks(int forknum)
 
 t_philosopher	*innit_phils(t_philovars *philovars, t_fork *forks, t_table *table)
 {
-	int 			phil_num;
 	int 			i;
 	t_philosopher	*philosophers;
 
 	if (!philovars || !table)
 		return (NULL);
-	phil_num = philovars->philo_num;
-	philosophers = malloc(phil_num * sizeof(t_philosopher));
+	philosophers = malloc(philovars->philo_num * sizeof(t_philosopher));
 	if (!philosophers)
 		return (NULL);
 	i = -1;
-	while (++i < phil_num)
+	while (++i < philovars->philo_num)
 	{
 		philosophers[i].idx = i;
 		philosophers[i].time_to_die = philovars->time_to_die;
 		philosophers[i].time_to_eat = philovars->time_to_eat;
 		philosophers[i].time_to_sleep = philovars->time_to_sleep;
 		philosophers[i].eat_max_num = philovars->eat_max_num;
-		philosophers[i].time_now = 0;
+		philosophers[i].last_meal_ms = 0;
 		philosophers[i].time_table = table;
+		philosophers[i].meals_taken = 0;
 		philosophers[i].left_fork = &forks[i];
-		philosophers[i].right_fork = &forks[(i + 1) % phil_num];
+		philosophers[i].right_fork = &forks[(i + 1) % philovars->philo_num];
+		philosophers[i].state = THINKING;
 	}
 	return (philosophers);
 }
 
-int	start_threads(t_philosopher *philosophers, int count)
+int	start_threads(t_philosopher *philosophers, int count, t_fork *forks, t_table *table)
 {
 	int	i;
 
 	if (!philosophers || count <= 0)
 		return (0);
-	i = 0;
-	while (i < count)
+	i = -1;
+	while (++i < count)
 	{
-		if (pthread_create(&philosophers[i].thread, NULL, routine, (void *)&philosophers[i]) != 0)
+		if (pthread_create(&philosophers[i].thread, NULL, routine, (void *)&philosophers[i]))
 		{
-			while (i > 0)
-			{
-				i--;
+			count = i;
+			while (--i > 0)
 				pthread_join(philosophers[i].thread, NULL);
-			}
+			destroymutex(count, forks);
 			return (0);
 		}
-		i++;
+	}
+	if (pthread_create(&table->monitor_thread, NULL, monitoring, (void *)philosophers))
+	{
+		while (--i > 0)
+			pthread_join(philosophers[i].thread, NULL);
+		destroymutex(count, forks);
+		return (0);
 	}
 	return (1);
 }

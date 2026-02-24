@@ -14,24 +14,26 @@
 
 void	printstate(t_philosopher **philosopher)
 {
-	t_philosopher *phil;
-	
+	t_philosopher	*phil;
+	long long		time_now;
+
 	phil = *philosopher;
+	time_now = get_the_time() - phil->time_table->start_time;
 	if (phil->state == THINKING)
 	{
-		printf("%lld philosopher%d is thinking\n", phil->time_now, phil->idx);
+		printf("%lld philosopher%d is thinking\n", time_now, phil->idx);
 	}
-	if (phil->state == FORKING)
+	else if (phil->state == FORKINGLEFT || phil->state == FORKINGRIGHT)
 	{
-		printf("%lld philosopher%d has taken a fork\n", phil->time_now, phil->idx);
+		printf("%lld philosopher%d has taken a fork\n", time_now, phil->idx);
 	}
 	else if (phil->state == EATING)
 	{
-		printf("%lld philosopher%d is eating\n", phil->time_now, phil->idx);
+		printf("%lld philosopher%d is eating\n", time_now, phil->idx);
 	}
 	else if (phil->state == SLEEPING)
 	{
-		printf("%lld philosopher%d is sleeping\n", phil->time_now, phil->idx);
+		printf("%lld philosopher%d is sleeping\n", time_now, phil->idx);
 	}
 }
 
@@ -41,9 +43,8 @@ void	sleeping(t_philosopher **philosopher)
 	
 	phil = *philosopher;
 	phil->state = SLEEPING;
-	//libertas os forks
-	//usleep do tempo de dormir
-	//enviar sinal que está a dormir	
+	usleep(phil->time_to_sleep);
+	printstate(philosopher);	
 }
 
 void	eating(t_philosopher **philosopher)
@@ -52,16 +53,18 @@ void	eating(t_philosopher **philosopher)
 	
 	phil = *philosopher;
 	pthread_mutex_lock(&phil->left_fork->using);
-	phil->state = FORKING;
+	phil->state = FORKINGLEFT;
 	printstate(philosopher);
 	pthread_mutex_lock(&phil->right_fork->using);
-	phil->state = FORKING;
+	phil->state = FORKINGRIGHT;
 	printstate(philosopher);
 	phil->state = EATING;
 	printstate(philosopher);
 	usleep(phil->time_to_eat);
 	pthread_mutex_unlock(&phil->right_fork->using);
 	pthread_mutex_unlock(&phil->left_fork->using);
+	phil->last_meal_ms = get_the_time();
+	phil->meals_taken++;
 }
 
 void	thinking(t_philosopher **philosopher)
@@ -84,14 +87,19 @@ void	*routine(void *philosopher)
 	times_to_eat = phil->eat_max_num;
 	while (times_to_eat)
 	{
+		if (!check_end_lock(phil))
+			break ;
 		thinking(&phil);
+		if (!check_end_lock(phil))
+			break ;
 		eating(&phil);
 		if (times_to_eat > 0)
 			times_to_eat--;
 		if (times_to_eat == 0)
 			break ;
+		if (!check_end_lock(phil))
+			break ;
 		sleeping(&phil);
 	}
-	//flag para acabar todas as outras threads
 	return (NULL);
 }

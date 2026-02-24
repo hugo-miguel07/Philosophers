@@ -82,6 +82,21 @@ int	innit_vars(t_philovars *philovars ,t_fork **forks, t_table **table, t_philos
 	return (1);
 }
 
+int	set_times(t_table **table, t_philosopher **philosophers, t_philovars *vars)
+{
+	int	philidx;
+
+	(*table)->start_time = get_the_time();
+	philidx = 0;
+	while(philidx < vars->philo_num)
+	{
+		(*philosophers)[philidx].time_table = *table;
+		(*philosophers)[philidx].last_meal_ms = (*table)->start_time;
+		philidx++;
+	}
+	return (1);
+}
+
 int	main(int ac, char **av)
 {
 	t_philovars 	*philovars;
@@ -102,12 +117,12 @@ int	main(int ac, char **av)
 		return (free(philovars), 1);
 	}
 	if (!innit_vars(philovars, &forks, &table, &philosophers))
-		return (0);
-	table->start_time = get_the_time();
-	if (!start_threads(philosophers, philovars->philo_num))
+		return (1);
+	if (!set_times(&table, &philosophers, philovars))
+		return (1);
+	if (!start_threads(philosophers, philovars->philo_num, forks, table))
 	{
 		print_error(6);
-		finish_routine(&philovars, &philosophers, &forks);
 		pthread_mutex_destroy(&table->write_lock);
 		free(table);
 		return (1);

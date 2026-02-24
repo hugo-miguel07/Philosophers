@@ -16,8 +16,9 @@
 # define SLEEPING 1
 # define EATING 2
 # define THINKING 3
-# define FORKING 4
-# define DEAD 5
+# define FORKINGLEFT 4
+# define FORKINGRIGHT 5
+# define DEAD 6
 
 # include <unistd.h>
 # include <stdio.h>
@@ -48,34 +49,39 @@ typedef struct s_table
 	t_fork			*forks;
 	pthread_mutex_t	write_lock;
 	int				simulation_end;
+	pthread_t		monitor_thread;
+	pthread_mutex_t	simulation_lock;
 }	t_table;
 
 typedef struct s_philosopher
 {
-	int			idx;		
-	long		time_to_die;
-	long		time_to_eat;
-	long		time_to_sleep;
-	int			eat_max_num;
-	int			state;
-	long long	time_now;
-	t_table 	*time_table;
-	t_fork		*left_fork;
-	t_fork		*right_fork;
-	pthread_t	thread;
+	int				idx;		
+	long			time_to_die;
+	long			time_to_eat;
+	long			time_to_sleep;
+	int				eat_max_num;
+	int				state;
+	unsigned int	meals_taken;
+	long long		last_meal_ms;
+	t_table 		*time_table;
+	t_fork			*left_fork;
+	t_fork			*right_fork;
+	pthread_t		thread;
 	
 }	t_philosopher;
 
 t_table			*innit_table(t_fork *forks, int philnum);
 t_fork			*innit_forks(int forknum);
 t_philosopher	*innit_phils(t_philovars *philovars, t_fork *forks, t_table *table);
-int				start_threads(t_philosopher *philosophers, int count);
+int				start_threads(t_philosopher *philosophers, int count, t_fork *forks, t_table *table);
 void			print_error_args();
 void			print_error(int erroridx);
 long			ft_atol(const char *nptr);
 int				ft_atoi(const char *nptr);
 int				is_number(const char *nptr);
+int				check_end_lock(t_philosopher *phil);
 void			*routine(void *philosopher);
+void			*monitoring(void *philosophers);
 void			finish_routine(t_philovars **pv, t_philosopher **p, t_fork **f);
 void			destroymutex(int mutex_num, t_fork *f);
 long long		get_the_time(void);
