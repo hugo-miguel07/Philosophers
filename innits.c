@@ -6,7 +6,7 @@
 /*   By: htavares <htavares@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/02/20 14:15:31 by htavares          #+#    #+#             */
-/*   Updated: 2026/02/24 13:37:30 by htavares         ###   ########.fr       */
+/*   Updated: 2026/03/04 17:09:59 by htavares         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -93,8 +93,7 @@ int	start_threads(t_philosopher *philosophers, int count, t_fork *forks, t_table
 	{
 		if (pthread_create(&philosophers[i].thread, NULL, routine, (void *)&philosophers[i]))
 		{
-			count = i;
-			while (--i > 0)
+			while (--i >= 0)
 				pthread_join(philosophers[i].thread, NULL);
 			destroymutex(count, forks);
 			return (0);
@@ -102,7 +101,7 @@ int	start_threads(t_philosopher *philosophers, int count, t_fork *forks, t_table
 	}
 	if (pthread_create(&table->monitor_thread, NULL, monitoring, (void *)philosophers))
 	{
-		while (--i > 0)
+		while (--i >= 0)
 			pthread_join(philosophers[i].thread, NULL);
 		destroymutex(count, forks);
 		return (0);

@@ -57,6 +57,7 @@ void	jointhreads(int thread_num, t_philosopher **p)
 		pthread_join((*p)[i].thread, NULL);
 		i++;
 	}
+	pthread_join((*p)->time_table->monitor_thread, NULL);
 }
 
 void	finish_routine(t_philovars **pv, t_philosopher **p, t_fork **f)
@@ -69,5 +70,7 @@ void	finish_routine(t_philovars **pv, t_philosopher **p, t_fork **f)
 	jointhreads(philo_num, p);
 	if (f && *f)
 		destroymutex(philo_num, *f);
+	pthread_mutex_destroy(&(*p)->time_table->write_lock);
+	pthread_mutex_destroy(&(*p)->time_table->simulation_lock);
 	freeall(pv, p, f);
 }

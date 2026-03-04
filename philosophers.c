@@ -74,6 +74,7 @@ int	innit_vars(t_philovars *philovars ,t_fork **forks, t_table **table, t_philos
 	if (!*philosophers)
 	{
 		pthread_mutex_destroy(&(*table)->write_lock);
+		pthread_mutex_destroy(&(*table)->simulation_lock);
 		free(*table);
 		destroymutex(philovars->philo_num, *forks);
 		print_error(6);
@@ -124,11 +125,11 @@ int	main(int ac, char **av)
 	{
 		print_error(6);
 		pthread_mutex_destroy(&table->write_lock);
-		free(table);
-		return (1);
+		pthread_mutex_destroy(&table->simulation_lock);
+		free(philovars);
+		return (free(table), free(philosophers), free(forks), 1);
 	}
 	finish_routine(&philovars, &philosophers, &forks);
-	pthread_mutex_destroy(&table->write_lock);
 	free(table);
 	return (0);
 }

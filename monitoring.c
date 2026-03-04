@@ -6,7 +6,7 @@
 /*   By: htavares <htavares@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/02/24 13:05:51 by htavares          #+#    #+#             */
-/*   Updated: 2026/02/24 13:39:28 by htavares         ###   ########.fr       */
+/*   Updated: 2026/03/04 16:35:02 by htavares         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -24,16 +24,59 @@ int	check_end_lock(t_philosopher *phil)
 	return (1);
 }
 
+static void	print_death(t_philosopher *phil)
+{
+	phil->state = DEAD;
+	printstate(&phil);
+	
+}
+
 void	*monitoring(void *philosophers)
 {
-	(void)philosophers;
-	//loop infinito que verifica continuamente
-	//calcula para cada se passou o tempo para morrer
-	//    agora - last_meal_ms >= time_to_die
-	//verifica se todos terminaram as refeicoes (se necessario)
-	//se alguem morrer setar simulation_end a 1 e lockar
-	//mini usleep(1000) no final para nao comer recursos do CPU
-	//ATENCAO
-	//simulation_end tem mm de usar o simulation_lock para evitar racing cond.
+	int				i;
+	int				ate;
+	t_philosopher	*phil;
+	
+	phil = (t_philosopher*)philosophers;
+	while (check_end_lock(phil))
+	{
+		i = 0;
+		while (i < phil->time_table->philo_num)
+		{
+			if (get_the_time() - (&phil[i])->last_meal_ms
+				>= (&phil[i])->time_to_die)
+			{
+				pthread_mutex_lock(&phil->time_table->simulation_lock);
+				phil->time_table->simulation_end = 1;
+				pthread_mutex_unlock(&phil->time_table->simulation_lock);
+				print_death(&(phil[i]));
+				return (NULL);
+			}
+			i++;
+		}
+		i = 0;
+		ate = 1;
+		if (phil->eat_max_num > -1)
+		{
+			while (i < phil->time_table->philo_num)
+			{
+				if ((&phil[i])->meals_taken
+					< (unsigned int)(&phil[i])->eat_max_num)
+				{
+					ate = 0;
+					break ;
+				}
+				i++;
+			}
+			if (ate)
+			{
+				pthread_mutex_lock(&phil->time_table->simulation_lock);
+					phil->time_table->simulation_end = 1;
+				pthread_mutex_unlock(&phil->time_table->simulation_lock);
+				return (NULL);
+			}
+		}
+		usleep(1000);
+	}
 	return (NULL);
 }

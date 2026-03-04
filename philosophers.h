@@ -84,6 +84,7 @@ void			*routine(void *philosopher);
 void			*monitoring(void *philosophers);
 void			finish_routine(t_philovars **pv, t_philosopher **p, t_fork **f);
 void			destroymutex(int mutex_num, t_fork *f);
+void			printstate(t_philosopher **philosopher);
 long long		get_the_time(void);
 
 #endif
