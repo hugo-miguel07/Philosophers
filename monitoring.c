@@ -6,7 +6,7 @@
 /*   By: htavares <htavares@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/02/24 13:05:51 by htavares          #+#    #+#             */
-/*   Updated: 2026/03/04 16:35:02 by htavares         ###   ########.fr       */
+/*   Updated: 2026/03/12 15:58:38 by htavares         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -43,6 +43,7 @@ void	*monitoring(void *philosophers)
 		i = 0;
 		while (i < phil->time_table->philo_num)
 		{
+			pthread_mutex_lock(&phil->time_table->write_lock);
 			if (get_the_time() - (&phil[i])->last_meal_ms
 				>= (&phil[i])->time_to_die)
 			{
@@ -50,8 +51,10 @@ void	*monitoring(void *philosophers)
 				phil->time_table->simulation_end = 1;
 				pthread_mutex_unlock(&phil->time_table->simulation_lock);
 				print_death(&(phil[i]));
+				pthread_mutex_unlock(&phil->time_table->write_lock);
 				return (NULL);
 			}
+			pthread_mutex_unlock(&phil->time_table->write_lock);
 			i++;
 		}
 		i = 0;

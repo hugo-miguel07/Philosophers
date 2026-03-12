@@ -35,6 +35,10 @@ void	printstate(t_philosopher **philosopher)
 	{
 		printf("%lld philosopher%d is sleeping\n", time_now, phil->idx);
 	}
+	else if (phil->state == DEAD)
+	{
+		printf("%lld philosopher%d is dead\n", time_now, phil->idx);
+	}
 }
 
 void	sleeping(t_philosopher **philosopher)
@@ -43,8 +47,8 @@ void	sleeping(t_philosopher **philosopher)
 	
 	phil = *philosopher;
 	phil->state = SLEEPING;
-	usleep(phil->time_to_sleep);
-	printstate(philosopher);	
+	printstate(philosopher);
+	usleep(phil->time_to_sleep * 1000);
 }
 
 void	eating(t_philosopher **philosopher)
@@ -60,11 +64,13 @@ void	eating(t_philosopher **philosopher)
 	printstate(philosopher);
 	phil->state = EATING;
 	printstate(philosopher);
-	usleep(phil->time_to_eat);
+	usleep(phil->time_to_eat * 1000);
 	pthread_mutex_unlock(&phil->right_fork->using);
 	pthread_mutex_unlock(&phil->left_fork->using);
+	pthread_mutex_lock(&phil->time_table->write_lock);
 	phil->last_meal_ms = get_the_time();
 	phil->meals_taken++;
+	pthread_mutex_unlock(&phil->time_table->write_lock);
 }
 
 void	thinking(t_philosopher **philosopher)
@@ -73,7 +79,11 @@ void	thinking(t_philosopher **philosopher)
 	
 	phil = *philosopher;
 	phil->state = THINKING;
-	usleep(100);
+	printstate(philosopher);
+	if (phil->idx % 2 == 0)
+		usleep(1000);
+	else
+		usleep(1500);
 }
 
 void	*routine(void *philosopher)
