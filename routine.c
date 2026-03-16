@@ -19,26 +19,20 @@ void	printstate(t_philosopher **philosopher)
 
 	phil = *philosopher;
 	time_now = get_the_time() - phil->time_table->start_time;
-	if (phil->state == THINKING)
-	{
-		printf("%lld philosopher%d is thinking\n", time_now, phil->idx);
-	}
-	else if (phil->state == FORKINGLEFT || phil->state == FORKINGRIGHT)
-	{
-		printf("%lld philosopher%d has taken a fork\n", time_now, phil->idx);
-	}
-	else if (phil->state == EATING)
-	{
-		printf("%lld philosopher%d is eating\n", time_now, phil->idx);
-	}
-	else if (phil->state == SLEEPING)
-	{
-		printf("%lld philosopher%d is sleeping\n", time_now, phil->idx);
-	}
+	pthread_mutex_lock(&phil->time_table->simulation_lock);
+	if (phil->state == THINKING && phil->time_table->simulation_end == 0)
+		printf("%lld philosopher%d is thinking\n", time_now, phil->idx  + 1);
+	else if ((phil->state == FORKINGLEFT || phil->state == FORKINGRIGHT)
+			&& phil->time_table->simulation_end == 0)
+		printf("%lld philosopher%d has taken a fork\n", time_now
+				, phil->idx + 1);
+	else if (phil->state == EATING && phil->time_table->simulation_end == 0)
+		printf("%lld philosopher%d is eating\n", time_now, phil->idx  + 1);
+	else if (phil->state == SLEEPING && phil->time_table->simulation_end == 0)
+		printf("%lld philosopher%d is sleeping\n", time_now, phil->idx  + 1);
 	else if (phil->state == DEAD)
-	{
-		printf("%lld philosopher%d is dead\n", time_now, phil->idx);
-	}
+		printf("%lld philosopher%d is dead\n", time_now, phil->idx + 1);
+	pthread_mutex_unlock(&phil->time_table->simulation_lock);
 }
 
 void	sleeping(t_philosopher **philosopher)
@@ -47,30 +41,57 @@ void	sleeping(t_philosopher **philosopher)
 	
 	phil = *philosopher;
 	phil->state = SLEEPING;
+	pthread_mutex_lock(&phil->time_table->write_lock);
 	printstate(philosopher);
+	pthread_mutex_unlock(&phil->time_table->write_lock);
 	usleep(phil->time_to_sleep * 1000);
 }
 
 void	eating(t_philosopher **philosopher)
 {
-	t_philosopher *phil;
-	
+	t_philosopher	*phil;
+	t_fork			*first_fork;
+	t_fork			*second_fork;
+
 	phil = *philosopher;
-	pthread_mutex_lock(&phil->left_fork->using);
+	if (phil->left_fork->forkidx < phil->right_fork->forkidx)
+	{
+		first_fork = phil->left_fork;
+		second_fork = phil->right_fork;
+	}
+	else
+	{
+		first_fork = phil->right_fork;
+		second_fork = phil->left_fork;
+	}
+	pthread_mutex_lock(&first_fork->using);
 	phil->state = FORKINGLEFT;
+	pthread_mutex_lock(&phil->time_table->write_lock);
 	printstate(philosopher);
-	pthread_mutex_lock(&phil->right_fork->using);
+	pthread_mutex_unlock(&phil->time_table->write_lock);
+	if (first_fork == second_fork)
+	{
+		while (check_end_lock(phil))
+			usleep(500);
+		pthread_mutex_unlock(&first_fork->using);
+		return ;
+	}
+	pthread_mutex_lock(&second_fork->using);
 	phil->state = FORKINGRIGHT;
+	pthread_mutex_lock(&phil->time_table->write_lock);
 	printstate(philosopher);
+	pthread_mutex_unlock(&phil->time_table->write_lock);
 	phil->state = EATING;
+	pthread_mutex_lock(&phil->time_table->write_lock);
 	printstate(philosopher);
-	usleep(phil->time_to_eat * 1000);
-	pthread_mutex_unlock(&phil->right_fork->using);
-	pthread_mutex_unlock(&phil->left_fork->using);
+	pthread_mutex_unlock(&phil->time_table->write_lock);
 	pthread_mutex_lock(&phil->time_table->write_lock);
 	phil->last_meal_ms = get_the_time();
 	phil->meals_taken++;
 	pthread_mutex_unlock(&phil->time_table->write_lock);
+	usleep(phil->time_to_eat * 1000);
+	pthread_mutex_unlock(&second_fork->using);
+	pthread_mutex_unlock(&first_fork->using);
 }
 
 void	thinking(t_philosopher **philosopher)
@@ -79,7 +100,9 @@ void	thinking(t_philosopher **philosopher)
 	
 	phil = *philosopher;
 	phil->state = THINKING;
+	pthread_mutex_lock(&phil->time_table->write_lock);
 	printstate(philosopher);
+	pthread_mutex_unlock(&phil->time_table->write_lock);
 	if (phil->idx % 2 == 0)
 		usleep(1000);
 	else

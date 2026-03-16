@@ -6,7 +6,7 @@
 /*   By: htavares <htavares@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/02/24 13:05:51 by htavares          #+#    #+#             */
-/*   Updated: 2026/03/12 15:58:38 by htavares         ###   ########.fr       */
+/*   Updated: 2026/03/16 12:46:18 by htavares         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -63,12 +63,15 @@ void	*monitoring(void *philosophers)
 		{
 			while (i < phil->time_table->philo_num)
 			{
+				pthread_mutex_lock(&phil->time_table->write_lock);
 				if ((&phil[i])->meals_taken
 					< (unsigned int)(&phil[i])->eat_max_num)
 				{
 					ate = 0;
+					pthread_mutex_unlock(&phil->time_table->write_lock);
 					break ;
 				}
+				pthread_mutex_unlock(&phil->time_table->write_lock);
 				i++;
 			}
 			if (ate)
