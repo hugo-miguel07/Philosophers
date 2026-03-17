@@ -63,18 +63,19 @@ typedef struct s_philosopher
 	int				state;
 	unsigned int	meals_taken;
 	long long		last_meal_ms;
-	t_table 		*time_table;
+	t_table			*time_table;
 	t_fork			*left_fork;
 	t_fork			*right_fork;
 	pthread_t		thread;
-	
 }	t_philosopher;
 
 t_table			*innit_table(t_fork *forks, int philnum);
 t_fork			*innit_forks(int forknum);
-t_philosopher	*innit_phils(t_philovars *philovars, t_fork *forks, t_table *table);
-int				start_threads(t_philosopher *philosophers, int count, t_fork *forks, t_table *table);
-void			print_error_args();
+t_philosopher	*innit_phils(t_philovars *philovars, t_fork *f,
+					t_table *table);
+int				start_threads(t_philosopher *philosophers, int count,
+					t_fork *f, t_table *table);
+void			print_error_args(void);
 void			print_error(int erroridx);
 long			ft_atol(const char *nptr);
 int				ft_atoi(const char *nptr);

@@ -34,7 +34,7 @@ void	freeall(t_philovars **pv, t_philosopher **p, t_fork **f)
 void	destroymutex(int mutex_num, t_fork *f)
 {
 	int	i;
-	
+
 	if (!f)
 		return ;
 	i = 0;
@@ -48,7 +48,7 @@ void	destroymutex(int mutex_num, t_fork *f)
 void	jointhreads(int thread_num, t_philosopher **p)
 {
 	int	i;
-	
+
 	if (!p || !*p)
 		return ;
 	i = 0;

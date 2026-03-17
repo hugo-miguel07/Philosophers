@@ -30,7 +30,7 @@ void	print_error(int erroridx)
 		write(1, "program failed to initialize philvars", 37);
 }
 
-void	print_error_args()
+void	print_error_args(void)
 {
 	write (1, "Error, it's needed 5 Arguments\n", 31);
 	write (1, "Args to pass: ", 14);

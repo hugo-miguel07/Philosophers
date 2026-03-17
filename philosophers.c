@@ -14,9 +14,9 @@
 
 void	parse_arguments(t_philovars **philovars, char **args, int ac)
 {
-	t_philovars *vars;
-	
-	vars = (t_philovars*)malloc(sizeof(t_philovars));
+	t_philovars	*vars;
+
+	vars = (t_philovars *)malloc(sizeof(t_philovars));
 	if (!vars)
 		return ;
 	vars->philo_num = ft_atoi(args[1]);
@@ -58,27 +58,27 @@ int	check_arguments(t_philovars *philovars, int *erroridx, char **args, int ac)
 	return (1);
 }
 
-int	innit_vars(t_philovars *philovars ,t_fork **forks, t_table **table, t_philosopher **philosophers)
+int	innit_vars(t_philovars *pv, t_fork **f, t_table **t, t_philosopher **p)
 {
-	*forks = innit_forks(philovars->philo_num);
-	if (!*forks)
-		return (free(philovars), print_error(7), 0);
-	*table = innit_table(*forks, philovars->philo_num);
-	if (!*table)
+	*f = innit_forks(pv->philo_num);
+	if (!*f)
+		return (free(pv), print_error(7), 0);
+	*t = innit_table(*f, pv->philo_num);
+	if (!*t)
 	{
-		destroymutex(philovars->philo_num, *forks);
+		destroymutex(pv->philo_num, *f);
 		print_error(7);
-		return (free(*forks), free(philovars), 0);
+		return (free(*f), free(pv), 0);
 	}
-	*philosophers = innit_phils(philovars, *forks, *table);
-	if (!*philosophers)
+	*p = innit_phils(pv, *f, *t);
+	if (!*p)
 	{
-		pthread_mutex_destroy(&(*table)->write_lock);
-		pthread_mutex_destroy(&(*table)->simulation_lock);
-		free(*table);
-		destroymutex(philovars->philo_num, *forks);
+		pthread_mutex_destroy(&(*t)->write_lock);
+		pthread_mutex_destroy(&(*t)->simulation_lock);
+		free(*t);
+		destroymutex(pv->philo_num, *f);
 		print_error(6);
-		return (free(*forks), free(philovars), 0);
+		return (free(*f), free(pv), 0);
 	}
 	return (1);
 }
@@ -89,7 +89,7 @@ int	set_times(t_table **table, t_philosopher **philosophers, t_philovars *vars)
 
 	(*table)->start_time = get_the_time();
 	philidx = 0;
-	while(philidx < vars->philo_num)
+	while (philidx < vars->philo_num)
 	{
 		(*philosophers)[philidx].time_table = *table;
 		(*philosophers)[philidx].last_meal_ms = (*table)->start_time;
@@ -100,12 +100,12 @@ int	set_times(t_table **table, t_philosopher **philosophers, t_philovars *vars)
 
 int	main(int ac, char **av)
 {
-	t_philovars 	*philovars;
+	t_philovars		*philovars;
 	int				erroridx;
-	t_philosopher	*philosophers;
+	t_philosopher	*phils;
 	t_fork			*forks;
 	t_table			*table;
-	
+
 	if (ac != 6 && ac != 5)
 		return (print_error_args(), 1);
 	philovars = NULL;
@@ -113,23 +113,16 @@ int	main(int ac, char **av)
 	if (!philovars)
 		return (print_error(7), 1);
 	if (!check_arguments(philovars, &erroridx, av, ac))
-	{
-		print_error(erroridx);
-		return (free(philovars), 1);
-	}
-	if (!innit_vars(philovars, &forks, &table, &philosophers))
+		return (print_error(erroridx), free(philovars), 1);
+	if (!innit_vars(philovars, &forks, &table, &phils)
+		|| !set_times(&table, &phils, philovars))
 		return (1);
-	if (!set_times(&table, &philosophers, philovars))
-		return (1);
-	if (!start_threads(philosophers, philovars->philo_num, forks, table))
+	if (!start_threads(phils, philovars->philo_num, forks, table))
 	{
 		print_error(6);
 		pthread_mutex_destroy(&table->write_lock);
 		pthread_mutex_destroy(&table->simulation_lock);
-		free(philovars);
-		return (free(table), free(philosophers), free(forks), 1);
+		return (free(philovars), free(table), free(phils), free(forks), 1);
 	}
-	finish_routine(&philovars, &philosophers, &forks);
-	free(table);
-	return (0);
+	return (finish_routine(&philovars, &phils, &forks), free(table), 0);
 }

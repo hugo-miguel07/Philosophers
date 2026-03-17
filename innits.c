@@ -6,7 +6,7 @@
 /*   By: htavares <htavares@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/02/20 14:15:31 by htavares          #+#    #+#             */
-/*   Updated: 2026/03/16 12:37:09 by htavares         ###   ########.fr       */
+/*   Updated: 2026/03/16 13:20:57 by htavares         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -36,8 +36,8 @@ t_table	*innit_table(t_fork *forks, int philnum)
 t_fork	*innit_forks(int forknum)
 {
 	t_fork	*forks;
-	int 	i;
-	
+	int		i;
+
 	if (forknum < 1)
 		return (NULL);
 	forks = malloc(forknum * sizeof(t_fork));
@@ -51,12 +51,12 @@ t_fork	*innit_forks(int forknum)
 			return (destroymutex(i, forks), free(forks), NULL);
 		i++;
 	}
-	return (forks);	
+	return (forks);
 }
 
-t_philosopher	*innit_phils(t_philovars *philovars, t_fork *forks, t_table *table)
+t_philosopher	*innit_phils(t_philovars *philovars, t_fork *f, t_table *table)
 {
-	int 			i;
+	int				i;
 	t_philosopher	*philosophers;
 
 	if (!philovars || !table)
@@ -75,35 +75,35 @@ t_philosopher	*innit_phils(t_philovars *philovars, t_fork *forks, t_table *table
 		philosophers[i].last_meal_ms = 0;
 		philosophers[i].time_table = table;
 		philosophers[i].meals_taken = 0;
-		philosophers[i].left_fork = &forks[i];
-		philosophers[i].right_fork = &forks[(i + 1) % philovars->philo_num];
+		philosophers[i].left_fork = &f[i];
+		philosophers[i].right_fork = &f[(i + 1) % philovars->philo_num];
 		philosophers[i].state = THINKING;
 	}
 	return (philosophers);
 }
 
-int	start_threads(t_philosopher *philosophers, int count, t_fork *forks, t_table *table)
+int	start_threads(t_philosopher *phils, int count, t_fork *f, t_table *table)
 {
 	int	i;
 
-	if (!philosophers || count <= 0)
+	if (!phils || count <= 0)
 		return (0);
 	i = -1;
 	while (++i < count)
 	{
-		if (pthread_create(&philosophers[i].thread, NULL, routine, (void *)&philosophers[i]))
+		if (pthread_create(&phils[i].thread, NULL, routine, (void *)&phils[i]))
 		{
 			while (--i >= 0)
-				pthread_join(philosophers[i].thread, NULL);
-			destroymutex(count, forks);
+				pthread_join(phils[i].thread, NULL);
+			destroymutex(count, f);
 			return (0);
 		}
 	}
-	if (pthread_create(&table->monitor_thread, NULL, monitoring, (void *)philosophers))
+	if (pthread_create(&table->monitor_thread, NULL, monitoring, (void *)phils))
 	{
 		while (--i >= 0)
-			pthread_join(philosophers[i].thread, NULL);
-		destroymutex(count, forks);
+			pthread_join(phils[i].thread, NULL);
+		destroymutex(count, f);
 		return (0);
 	}
 	return (1);
