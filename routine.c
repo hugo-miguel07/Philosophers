@@ -29,7 +29,7 @@ static int	eating_cont(t_philosopher *phil, t_fork *ffork, t_fork *sfork)
 	if (ffork == sfork)
 	{
 		while (check_end_lock(phil))
-			usleep(500);
+			usleep(300);
 		pthread_mutex_unlock(&ffork->using);
 		return (0);
 	}
@@ -88,9 +88,9 @@ void	thinking(t_philosopher **philosopher)
 	printstate(philosopher);
 	pthread_mutex_unlock(&phil->time_table->write_lock);
 	if (phil->idx % 2 == 0)
-		usleep(1000);
+		usleep(100);
 	else
-		usleep(1500);
+		usleep(150);
 }
 
 void	*routine(void *philosopher)

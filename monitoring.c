@@ -6,7 +6,7 @@
 /*   By: htavares <htavares@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/02/24 13:05:51 by htavares          #+#    #+#             */
-/*   Updated: 2026/03/17 12:56:28 by htavares         ###   ########.fr       */
+/*   Updated: 2026/03/18 11:25:59 by htavares         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -102,7 +102,7 @@ void	*monitoring(void *philosophers)
 			pthread_mutex_unlock(&phil->time_table->simulation_lock);
 			return (NULL);
 		}
-		usleep(1000);
+		usleep(100);
 	}
 	return (NULL);
 }
