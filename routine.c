@@ -34,8 +34,8 @@ static int	eating_cont(t_philosopher *phil, t_fork *ffork, t_fork *sfork)
 		return (0);
 	}
 	pthread_mutex_lock(&sfork->using);
-	phil->state = FORKINGRIGHT;
 	pthread_mutex_lock(&phil->time_table->write_lock);
+	phil->state = FORKINGRIGHT;
 	printstate(&phil);
 	pthread_mutex_unlock(&phil->time_table->write_lock);
 	phil->state = EATING;
