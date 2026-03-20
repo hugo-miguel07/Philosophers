@@ -70,8 +70,8 @@ void	eating(t_philosopher **philosopher)
 		second_fork = phil->left_fork;
 	}
 	pthread_mutex_lock(&first_fork->using);
-	phil->state = FORKINGLEFT;
 	pthread_mutex_lock(&phil->time_table->write_lock);
+	phil->state = FORKINGLEFT;
 	printstate(philosopher);
 	pthread_mutex_unlock(&phil->time_table->write_lock);
 	if (!eating_cont(phil, first_fork, second_fork))
